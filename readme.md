@@ -1,6 +1,6 @@
 COMET
 ==========
-Counterexample-guided techniques to provably enforce and train a neural netowrk with monotonicity constraints.
+Counterexample-guided techniques to provably enforce and train a neural network with monotonicity constraints.
 
 <p align="center">
   <img src="docs/architecture.png" width="200"/>
@@ -38,19 +38,19 @@ Counterexample-guided techniques to provably enforce and train a neural netowrk 
 
 3. Install Solvers
 `pip install z3-solver`
-Download optimathsat (http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check installation by running `optimathsat -version`
+Download optimathsat (http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check the installation by running `optimathsat -version`
 
 ## Onboarding a Neural Network
 To run on example networks skip ahead. To onboard your neural network
 
-0. You need a trained baseline ReLU neural network model (model.h5), weights and bias as csv files.
+0. You need a trained baseline ReLU neural network model (model.h5), weights, and bias as csv files.
 
 1. `cp templates/template.txt configurations/<dataset_name>.txt` and configure COMET for your dataset.
 
 2. `cp templates/DeepModel_Template.py src/Models/DeepModel_<dataset_name>.py` and fill in the code blocks (#TODO: CODE BLOCK) in `make_data` function for COMET to interact with your model.
 
 ## Monotonicity Verification
-Once you have setup your neural network, you can verify if it is monotonic using:
+Once you have set up your neural network, you can verify if it is monotonic using:
 
 `python src/COMET.py configurations/<config_file>.txt --mode verifier`. 
 
