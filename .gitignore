@@ -1,0 +1,7 @@
+*.csv
+*.h5
+Runs/
+*.pyc
+*.txt
+*.vscode
+*.DS_Store
