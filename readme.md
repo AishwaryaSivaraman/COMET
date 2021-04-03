@@ -37,14 +37,14 @@ Counterexample-guided techniques to provably enforce and train a neural network 
 `pip install matplotlib pandas pillow tensorflow scikit-learn sexpdata joblib beautifultable`
 
 3. Install Solvers
-`pip install z3-solver`
-Download optimathsat (v1.7.1)(http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check the installation by running `optimathsat -version`
-* If installing on a Linux server, go to (http://optimathsat.disi.unitn.it/pages/downloadall.html) and click 'download' under Version 1.7.1 Linux distribution
+`pip install z3-solver=4.8.7`
+Download optimathsat (v1.7.0.1)(http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check the installation by running `optimathsat -version`
+* If installing on a Linux server, go to (http://optimathsat.disi.unitn.it/pages/downloadall.html) and click 'download' under Version 1.7.0.1 Linux distribution
 * Use `scp` or a file transfer software (ie Cyberduck) to transfer the tar file to the server
-  * for example, on your local device, use `scp optimathsat-1.7.1-linux-64-bit.tar.gz <username>@<server>:<path/to/dir>`
-  * Untar the file on the server with `tar -xvf optimathsat-1.7.1-linux-64-bit.tar.gz`
-* Find the path to the executable by doing `cd optimathsat-1.7.1-linux-64-bit/bin` and `pwd`
-* Add this path to the `$PATH` environment variable (in our .bash_profile or .bashrc)
+  * for example, on your local device, use `scp optimathsat-1.7.0.1-linux-64-bit.tar.gz <username>@<server>:<path/to/dir>`
+  * Untar the file on the server with `tar -xvf optimathsat-1.7.0.1-linux-64-bit.tar.gz`
+* Find the path to the executable by doing `cd optimathsat-1.7.0.1-linux-64-bit/bin` and `pwd`.
+* Copy paste this path to the `$PATH` environment variable (in our .bash_profile or .bashrc)
 
 ## Onboarding a Neural Network
 To run on example networks skip ahead. To onboard your neural network
