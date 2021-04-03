@@ -37,7 +37,7 @@ Counterexample-guided techniques to provably enforce and train a neural network 
 `pip install matplotlib pandas pillow tensorflow scikit-learn sexpdata joblib beautifultable`
 
 3. Install Solvers
-`pip install z3-solver=4.8.7`
+`pip install z3-solver==4.8.7`
 Download optimathsat (v1.7.0.1)(http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check the installation by running `optimathsat -version`
 * If installing on a Linux server, go to (http://optimathsat.disi.unitn.it/pages/downloadall.html) and click 'download' under Version 1.7.0.1 Linux distribution
 * Use `scp` or a file transfer software (ie Cyberduck) to transfer the tar file to the server
