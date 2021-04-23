@@ -5,3 +5,4 @@ Runs/
 *.txt
 *.vscode
 *.DS_Store
+comet/
