@@ -304,7 +304,7 @@ def counter_example_generator_upper_env(datapoint, monotonic_indices, label, pat
             f.write("(get-value ("+variableNameForIndex+"))\n")
         f.write("(get-value (f_y))\n(exit)")
 
-    return solve(logging,variable_types,monotonic_indices,input_features,datapoint, tf,prefix_path)
+    return solve(logging,variable_types,monotonic_indices,input_features,datapoint,tf.name,prefix_path)
 
 def counter_example_generator_lower_env(datapoint, monotonic_indices, label, path, layers, monotonicity_direction, min_dict, max_dict, variable_types, logging="", prefix_path="", isClassification = False):
     s = Optimize()
@@ -390,7 +390,7 @@ def counter_example_generator_lower_env(datapoint, monotonic_indices, label, pat
             f.write("(get-value ("+variableNameForIndex+"))\n")
         f.write("(get-value (f_y))\n(exit)")
 
-    return solve(logging, variable_types, monotonic_indices, input_features, datapoint, tf, prefix_path)
+    return solve(logging, variable_types, monotonic_indices, input_features, datapoint, tf.name, prefix_path)
 
 def parseSexp(sexp):
     parsed_sexp = loads(sexp)
@@ -405,11 +405,11 @@ def parseSexp(sexp):
     return (parsed_sexp[0][0],val)
 
 
-def solve(logging, variable_types,monotonic_indices,input_features,datapoint, smtFileName = "",prefix_path=""):
+def solve(logging, variable_types,monotonic_indices,input_features,datapoint, smtFileName, prefix_path=""):
     start_time = time.time()
     try:
         optimatsatsolver_path = "optimathsat"
-        cmd = optimatsatsolver_path+" "+ prefix_path +smtFileName.name
+        cmd = optimatsatsolver_path+" "+ prefix_path +smtFileName
 
         elapsed_time = time.time() - start_time
         p = subprocess.Popen([cmd, ""], shell=True,
@@ -453,12 +453,10 @@ def solve(logging, variable_types,monotonic_indices,input_features,datapoint, sm
         for i in range(0,input_features):
             if i in monotonic_indices:
                 datapoint[i] = cg_parsedsexp[i]
-        os.remove(prefix_path +smtFileName.name)
         return datapoint,elapsed_time,f_y
     except Exception as e:
         print("Exception "+ str(e))
         elapsed_time = time.time() - start_time
-        os.remove(prefix_path +smtFileName.name)
         return None,elapsed_time,None
 
 def generateFinalLayerConstraint(z3LayerConstraints,weights,bias):
