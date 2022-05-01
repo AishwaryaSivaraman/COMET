@@ -217,10 +217,10 @@ def verification(data_path, log_file, n_folds, monotonic_indices):
                         counter_batch = pd.DataFrame(counter_batch, columns= column_names)
                         batch_labels = pd.DataFrame(batch_labels)
 
-                        train_batch = original_train.append(counter_batch, ignore_index = True,sort=False)
-                        train_batch_label = original_label.append(batch_labels, ignore_index = True)
+                        train_batch = pd.concat([original_train, counter_batch], ignore_index = True)
+                        train_batch_label = pd.concat([original_label, batch_labels], ignore_index = True)
 
-                        logging.debug('Mean Squared Error after batch %d/%d counterexample: '%((temp_batch_count,len(batches))))
+                        logging.debug(f'Mean Squared Error after batch {temp_batch_count}/{len(batches)} counterexample: ')
                         NN_model = update_model(train_batch, train_batch_label, NN_model,getConfigurations(),update_batch)
 
 

@@ -7,12 +7,15 @@ import tempfile
 import subprocess
 import numpy as np
 
-from z3 import *
+import z3
+from z3 import Optimize, Implies, Int, Real, IntVal, RealVal, ToReal
 from datetime import datetime
 from sexpdata import loads, dumps
 
 
 epsilon = 0.001
+
+optimatsatsolver_path = "optimathsat -optimization=true"
 
 def verifier(monotonic_indices,path,layers,monotonicity_direction,min_dict,max_dict,variable_types,model="",logging="",isUpper = True, prefix_path=""):
     s = Optimize()
@@ -73,24 +76,21 @@ def verifier(monotonic_indices,path,layers,monotonicity_direction,min_dict,max_d
         f.write(sexpr)
         f.write("(exit)")
     start_time = datetime.now()
-    try:
-        optimatsatsolver_path = "optimathsat"
-        cmd = optimatsatsolver_path+" "+prefix_path+tf.name
-        p = subprocess.Popen([cmd, ""], shell=True,
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
-        p.wait()
-        returned_value = p.stdout.read().decode('UTF-8')
-        elapsed_time = datetime.now() - start_time
-        if "unsat" in returned_value:
-            return "UNSAT", None, elapsed_time.total_seconds()
-        else:
-            if "sat" in returned_value:
-                return "SAT", returned_value, elapsed_time.total_seconds()
-    except Exception as e:
-        print("Exception ", e)
-        return "Exception while verifying",None, None
 
-def counter_pair_generator(datapoint, monotonic_index, index,label,path,layers,monotonicity_direction,min,max,variable_types,model="",logging="",isUpper = True, prefix_path=""):
+    cmd = optimatsatsolver_path+" "+prefix_path+tf.name
+    p = subprocess.Popen([cmd, ""], shell=True,
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+    p.wait()
+    returned_value = p.stdout.read().decode('UTF-8')
+    elapsed_time = datetime.now() - start_time
+    if "unsat" in returned_value:
+        return "UNSAT", None, elapsed_time.total_seconds()
+    else:
+        if "sat" in returned_value:
+            return "SAT", returned_value, elapsed_time.total_seconds()
+
+
+def counter_pair_generator(datapoint, monotonic_index, index,label,path,layers,monotonicity_direction,min,max,variable_types,model,logging,isUpper = True, prefix_path=""):
     s = Optimize()
     variableMap ={}
     variableMapF2 ={}
@@ -177,33 +177,27 @@ def counter_pair_generator(datapoint, monotonic_index, index,label,path,layers,m
         # f.write("(get-value ("+variableNameForIndex+"))\n(get-value (f_y))\n(exit)")
         f.write("(get-value (x"+str(monotonic_index)+"))\n(get-value ("+variableNameForIndex+"))\n(get-value (diff))\n(exit)")
     start_time = time.time()
-    try:
-        optimatsatsolver_path = "optimathsat"
-        cmd = optimatsatsolver_path+" "+prefix_path+tf.name
-        elapsed_time = time.time() - start_time
-        p = subprocess.Popen([cmd, ""], shell=True,
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
-        p.wait()
-        elapsed_time = time.time() - start_time
-        # subprocess.call(cmd,shell = True) 
-        returned_value = p.stdout.read().decode('UTF-8')
-        if "unsat" in returned_value:
-            logging.debug("Unsat: No model")
-            return None, elapsed_time,index
-        returned_values  = returned_value.splitlines()
-        solved_vals = []
-        for v in returned_values:
-            if "sat" in v:
-                continue
-            name, val = parseSexp(v)
-            if 'x' in dumps(name) or 'y' in dumps(name):
-                solved_vals.append(val)
-        return solved_vals,elapsed_time,index
-    except Exception as e:
-        print("Exception ", e)
-        elapsed_time = time.time() - start_time
-        return None,elapsed_time,index
 
+    cmd = optimatsatsolver_path+" "+prefix_path+tf.name
+    elapsed_time = time.time() - start_time
+    p = subprocess.Popen([cmd, ""], shell=True,
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+    p.wait()
+    elapsed_time = time.time() - start_time
+    # subprocess.call(cmd,shell = True) 
+    returned_value = p.stdout.read().decode('UTF-8')
+    if "unsat" in returned_value:
+        logging.debug("Unsat: No model")
+        return None, elapsed_time,index
+    returned_values  = returned_value.splitlines()
+    solved_vals = []
+    for v in returned_values:
+        if "sat" in v:
+            continue
+        name, val = parseSexp(v)
+        if 'x' in dumps(name) or 'y' in dumps(name):
+            solved_vals.append(val)
+    return solved_vals,elapsed_time,index
 
 def nn_encoding(variableMap, weightDict, type_nn,layers,biasDict,s):
     input_vars = variableMap
@@ -220,7 +214,7 @@ def nn_encoding(variableMap, weightDict, type_nn,layers,biasDict,s):
     return encoding
 
 
-def counter_example_generator_upper_env(datapoint, monotonic_indices, label, path, layers, monotonicity_direction, min_dict, max_dict, variable_types, logging="", prefix_path="", isClassification = False):
+def counter_example_generator_upper_env(datapoint, monotonic_indices, label, path, layers, monotonicity_direction, min_dict, max_dict, variable_types, logging, prefix_path="", isClassification = False):
     s = Optimize()
     variableMap ={}
     variableMapF2 ={}
@@ -407,57 +401,51 @@ def parseSexp(sexp):
 
 def solve(logging, variable_types,monotonic_indices,input_features,datapoint, smtFileName, prefix_path=""):
     start_time = time.time()
-    try:
-        optimatsatsolver_path = "optimathsat"
-        cmd = optimatsatsolver_path+" "+ prefix_path +smtFileName
+    cmd = optimatsatsolver_path+" "+ prefix_path +smtFileName
 
-        elapsed_time = time.time() - start_time
-        p = subprocess.Popen([cmd, ""], shell=True,
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
-        p.wait()
-        elapsed_time = time.time() - start_time
-        counter_examples = []
-        returned_value = p.stdout.read().decode('UTF-8')
-        if "unsat" in returned_value:
-            logging.debug("Unsat: No model")
-            return None, elapsed_time, None
-        
-        noOfLines = len(returned_value.splitlines())
-        f_y_parsedsexp = loads(returned_value.splitlines()[noOfLines-1])
+    elapsed_time = time.time() - start_time
+    p = subprocess.Popen([cmd, ""], shell=True,
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+    p.wait()
+    elapsed_time = time.time() - start_time
+    counter_examples = []
+    returned_value = p.stdout.read().decode('UTF-8')
+    if "unsat" in returned_value:
+        logging.debug("Unsat: No model")
+        return None, elapsed_time, None
+    
+    noOfLines = len(returned_value.splitlines())
+    f_y_parsedsexp = loads(returned_value.splitlines()[noOfLines-1])
 
-        f_y = 0.0
-        if '-' in returned_value.splitlines()[noOfLines-1]:
-            f_y = -1 * float((1.0*f_y_parsedsexp[0][1][1][1])/f_y_parsedsexp[0][1][1][2])
+    f_y = 0.0
+    if '-' in returned_value.splitlines()[noOfLines-1]:
+        f_y = -1 * float((1.0*f_y_parsedsexp[0][1][1][1])/f_y_parsedsexp[0][1][1][2])
+    else:
+        f_y = float((1.0*f_y_parsedsexp[0][1][1])/f_y_parsedsexp[0][1][2])
+
+    cg_parsedsexp = {}
+    count = 1
+    for monotonic_index in monotonic_indices:
+        cg_parsed = loads(returned_value.splitlines()[count])
+        cg = 0
+        if variable_types[monotonic_index] == "Int":
+            cg = int(cg_parsed[0][1])
         else:
-            f_y = float((1.0*f_y_parsedsexp[0][1][1])/f_y_parsedsexp[0][1][2])
-
-        cg_parsedsexp = {}
-        count = 1
-        for monotonic_index in monotonic_indices:
-            cg_parsed = loads(returned_value.splitlines()[count])
-            cg = 0
-            if variable_types[monotonic_index] == "Int":
-                cg = int(cg_parsed[0][1])
-            else:
-                if '/' in returned_value.splitlines()[count]:
-                    if '-' in returned_value.splitlines()[count]:
-                        cg = -1 * float(cg_parsed[0][1][1][1]/cg_parsed[0][1][1][2])
-                    else:
-                        cg = float(cg_parsed[0][1][1]/cg_parsed[0][1][2])
+            if '/' in returned_value.splitlines()[count]:
+                if '-' in returned_value.splitlines()[count]:
+                    cg = -1 * float(cg_parsed[0][1][1][1]/cg_parsed[0][1][1][2])
                 else:
-                    cg = float(cg_parsed[0][1])
-            count = count + 1
-            cg_parsedsexp[monotonic_index] = cg
+                    cg = float(cg_parsed[0][1][1]/cg_parsed[0][1][2])
+            else:
+                cg = float(cg_parsed[0][1])
+        count = count + 1
+        cg_parsedsexp[monotonic_index] = cg
 
-        logging.debug('violation = %2f'%(f_y))
-        for i in range(0,input_features):
-            if i in monotonic_indices:
-                datapoint[i] = cg_parsedsexp[i]
-        return datapoint,elapsed_time,f_y
-    except Exception as e:
-        print("Exception "+ str(e))
-        elapsed_time = time.time() - start_time
-        return None,elapsed_time,None
+    logging.debug('violation = %2f'%(f_y))
+    for i in range(0,input_features):
+        if i in monotonic_indices:
+            datapoint[i] = cg_parsedsexp[i]
+    return datapoint,elapsed_time,f_y
 
 def generateFinalLayerConstraint(z3LayerConstraints,weights,bias):
     count =0
