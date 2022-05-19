@@ -38,7 +38,7 @@ Counterexample-guided techniques to provably enforce and train a neural network 
 
 3. Install Solvers
 `pip install z3-solver`
-Download optimathsat (http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check the installation by running `optimathsat -version`
+Download optimathsat 1.7.3 (http://optimathsat.disi.unitn.it/pages/download-js.html) and add it to your environment path. Check the installation by running `optimathsat -version`
 
 ## Onboarding a Neural Network
 To run on example networks skip ahead. To onboard your neural network
